@@ -1,0 +1,56 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+import numpy as np
+df = pd. read_csv ('/Users/kiransandeep/Downloads/python project/dataset.csv')
+df['Date'] = pd.to_datetime(df['Date'], errors='coerce', dayfirst=True)
+df['Month_Year'] = df['Date'].dt.to_period('M')
+for col in ['Net_sales', 'Taxes']:
+    df[col] = df[col].str.replace("?", "").str.replace(",", "").astype(float)
+# 1. Pie Chart: Sales by Payment Mode
+plt.figure(figsize=(6, 6))
+df.groupby('Payment_Mode')['Total_sales'].sum().plot.pie(autopct='%1.1f%%', startangle=140)
+plt.title("Total Sales by Payment Mode")
+plt.ylabel("")
+plt.tight_layout()
+plt.show()
+# 2. Horizontal Bar: Top 10 Sub-Categories by Total Sales
+top_subcats = df.groupby('Sub_Category')['Total_sales'].sum().sort_values(ascending=False).head(10)
+plt.figure(figsize=(10, 6))
+sns.barplot(x=top_subcats.values, y=top_subcats.index)
+plt.title("Top 10 Sub-Categories by Total Sales")
+plt.xlabel("Total Sales")
+plt.tight_layout()
+plt.show()
+# 3. Line Plot: Monthly Sales Trend
+monthly_sales = df.groupby('Month_Year')['Total_sales'].sum()
+plt.figure(figsize=(10, 5))
+monthly_sales.plot(marker='o')
+plt.title("Monthly Total Sales Trend")
+plt.xlabel("Month-Year")
+plt.ylabel("Total Sales")
+plt.grid(True)
+plt.tight_layout()
+plt.show()
+# 4. Box Plot: Total Sales per Category
+plt.figure(figsize=(8, 6))
+sns.boxplot(data=df, x='Category', y='Total_sales')
+plt.title("Total Sales Distribution by Category")
+plt.tight_layout()
+plt.show()
+# 5. Heatmap: Returns by State and Category
+heatmap_data = pd.pivot_table(df, values='Returns', index='State', columns='Category', aggfunc='sum', fill_value=0)
+plt.figure(figsize=(12, 8))
+sns.heatmap(heatmap_data, annot=True, fmt="d", cmap="YlGnBu")
+plt.title("Returns by State and Category")
+plt.tight_layout()
+plt.show()
+# 6. Multi-Line Chart : Sales Trend by Category Over Time
+category_time_sales = df.groupby(['Month_Year', 'Category'])['Total_sales'].sum().unstack()
+category_time_sales.plot(figsize=(12, 6), marker='o')
+plt.title("Sales Trend Over Time by Category")
+plt.xlabel("Month-Year")
+plt.ylabel("Total Sales")
+plt.grid(True)
+plt.tight_layout()
+plt.show()
